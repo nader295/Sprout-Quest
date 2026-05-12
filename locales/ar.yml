@@ -1,0 +1,211 @@
+commands:
+  help:
+    description: "سأساعدك في رعاية حديقتك!"
+  privacy:
+    description: "سياسة الخصوصية - ما هي البيانات التي نخزنها"
+  grow:
+    description: "ازرع نبتتك!"
+    result: "نبتتك %{event} بمقدار <b>%{incr} سم</b> وأصبح طولها الآن <b>%{length} سم</b>!"
+    direction:
+      grown: "نمت"
+      shrunk: "تم تقليمها"
+    position: "ترتيبك في الحديقة هو <b>%{pos}</b>."
+    tomorrow: "لقد سقيت نبتتك اليوم بالفعل. عد غداً!"
+    pruned_consolation: "لا تقلق! إليك <b>%{sunbeams} شعاع شمس</b> لتساعدك على النمو بشكل أقوى في المرة القادمة."
+  top:
+    description: "شاهد أطول النباتات في الحديقة"
+    title: "لوحة صدارة الحديقة - أطول النباتات:"
+    line: "%{n}|<b>%{name}</b> — <b>%{length}</b> سم"
+    ending: "<i>[+] يعني أن هذا البستاني لم يسقِ نبتته اليوم بعد.</i>"
+    empty: "الحديقة فارغة! لم يزرع أحد نبتة بعد."
+  dod:
+    description: "توج نبتة اليوم"
+    result: "نبتة اليوم هي <b><a href=\"tg://user?id=%{uid}\">%{name}</a></b>!\n\nنبتتهم نمت <b>%{growth} سم</b> وأصبح طولها الآن <b>%{length}</b> سم!"
+    position: "ترتيبهم في الحديقة هو <b>%{pos}</b>."
+    already_chosen: "تم اختيار نبتة اليوم بالفعل! إنها <b>%{name}</b>."
+    no_candidates: "لا يوجد مرشحون بعد. لم يزرع أحد في هذه الحديقة نبتة!"
+  pvp:
+    description: "تحدَّ صديقك في مبارزة ودية!"
+    results:
+      start: "<b>%{name}</b> تحدى الحديقة برهان <b>%{bet} سم</b>!"
+      finish: "الفائز هو <b>%{winner_name}</b>! نبتته الآن <b>%{winner_length} سم</b>. النبتة الأخرى <b>%{loser_length}</b> سم.\nكان الرهان <b>%{bet} سم</b>."
+      position:
+        winner: "ترتيب <b>%{name}</b> في الحديقة هو <b>%{pos}</b>."
+        loser: "ترتيب <b>%{name}</b> في الحديقة هو <b>%{pos}</b>."
+      stats:
+        text: "معدل فوز <b>الفائز</b> — <b>%{winner_win_rate}</b>.\nسلسلة الانتصارات الحالية — <b>%{winner_win_streak}</b>، أعلى سلسلة — <b>%{winner_win_streak_max}</b>.\nمعدل فوز <b>المنافس</b> — <b>%{loser_win_rate}</b>."
+        lost_win_streak: "انكسرت سلسلة من <b>%{lost_win_streak}</b> انتصاراً."
+      withheld: "تم التبرع بـ <b>%{payout} سم</b> لسداد قرض الحديقة."
+      mercy:
+        shown: "<b>%{winner_name}</b> أظهر الرحمة! أخذ فقط <b>%{taken} سم</b> وترك <b>%{returned} سم</b> لـ <b>%{loser_name}</b>."
+        full_return: "<b>%{winner_name}</b> أظهر لطفاً كبيراً! أعاد كل <b>%{bet} سم</b> لـ <b>%{loser_name}</b> وحصل على نقطة روح طيبة!"
+        grace_token: "<b>%{loser_name}</b> حصل على رمز النعمة لإظهار الرحمة له!"
+        blessed_buff: "<b>%{loser_name}</b> حصل على تعزيز النبتة المباركة (+20% نمو لمدة 24 ساعة)!"
+    button: "اقبل التحدي!"
+    mercy_buttons:
+      take_full: "خذ الجائزة كاملة"
+      show_mercy: "أظهر الرحمة (50/50)"
+      full_return: "إرجاع كامل (روح طيبة)"
+    mercy_prompt: "<b>%{winner_name}</b> فاز! اختر إجراءك (15 ثانية):"
+    mercy_timeout: "انتهى الوقت. تم أخذ الجائزة كاملة تلقائياً."
+    errors:
+      no_args: "يرجى تحديد عدد السنتيمترات التي تريد المراهنة عليها. مثال: /duel 10"
+      not_enough:
+        initiator: "نبتتك ليست طويلة بما يكفي لهذا الرهان الكبير!"
+        acceptor: "نبتتك تحتاج إلى مزيد من النمو قبل قبول هذا التحدي!"
+      same_person: "لا يمكنك المبارزة مع نفسك! تحدَّ صديقاً بدلاً من ذلك."
+      battle_already_in_progress: "المبارزة جارية بالفعل! انتظر حتى تنتهي..."
+  stats:
+    description: "عرض إحصائيات حديقتك"
+    length: "الطول: <b>%{length} سم</b>\nترتيب الحديقة: <b>%{pos}</b>"
+    pvp: "معدل الفوز: <b>%{win_rate}</b>\nالمبارزات: <b>%{battles}</b>\nالانتصارات: <b>%{wins}</b>\nأعلى سلسلة انتصارات: <b>%{win_streak}</b>\nالطول المكتسب: <b>%{acquired} سم</b>\nالطول المفقود: <b>%{lost} سم</b>"
+    notice: "بدأ تتبع الإحصائيات في 2 يوليو 2024."
+    personal: "<i>إحصائياتك الشخصية:</i>\n— الحدائق التي تزرع فيها: <b>%{chats}</b>\n— أطول نبتة: <b>%{max_length} سم</b>\n— إجمالي الطول في جميع الحدائق: <b>%{total_length} سم</b>"
+    mercy_stats: "الرحمة المُظهرة: <b>%{mercy_shown}</b> مرة\nالرحمة المتلقاة: <b>%{mercy_received}</b> مرة\nنقاط الروح الطيبة: <b>%{kind_soul_points}</b>"
+  loan:
+    description: "طول سالب؟ احصل على قرض حديقة!"
+    debt: "الدين المتبقي: <b>%{debt} سم</b>"
+    confirmation:
+      text: "ستُعاد نبتتك إلى الصفر، لكن كل نمو سيُخفض بنسبة <b>%{payout_percentage}</b> حتى يُسدد كامل <b>%{debt} سم</b>."
+      buttons:
+        agree: "قبول القرض"
+        disagree: "رفض"
+    callback:
+      success: "تم إصدار قرض الحديقة بنجاح!"
+      refused: "رفض البستاني عرض القرض."
+      payout_ratio_changed: "تغيرت شروط القرض. يرجى المحاولة مرة أخرى."
+    errors:
+      positive_length: "عذراً، برنامج القروض فقط للنباتات التي تم تقليمها بشكل مفرط. نبتتك صحية!"
+  import:
+    description: "استيراد النباتات من بوتات أخرى"
+    result:
+      titles:
+        imported: "تم استيراد البستانيين التاليين:"
+        already_present: "هؤلاء البستانيين كانوا في الحديقة بالفعل:"
+        not_found: "هؤلاء البستانيين لم يبدأوا الزراعة بعد:"
+      line:
+        imported: "- <b>%{name}</b> (<i>%{length}</i> سم)"
+        already_present: "- <b>%{name}</b> (<i>%{length}</i> سم)"
+        not_found: "- <b>%{name}</b>"
+    errors:
+      not_admin: "فقط مديرو الحديقة يمكنهم استخدام هذا الأمر!"
+      not_reply: "يرجى الرد على رسالة من %{origin_bots}"
+      invalid_lines:
+        template: "تعذر تحليل هذه الرسالة. السطور غير الصالحة:\n%{invalid_lines}"
+        line: "- <b>%{line}</b>"
+  promo:
+    description: "تفعيل رمز ترويجي"
+    request: "أدخل رمزك الترويجي:"
+    success:
+      template: "تم تفعيل الرمز الترويجي بنجاح! %{ending}"
+      singular: "نمت نبتتك <b>%{growth}</b> سم في حديقة واحدة."
+      plural: "نمت نبتتك <b>%{growth}</b> سم في <b>%{affected_chats}</b> حدائق!"
+    errors:
+      no_activations_left: "هذا الرمز الترويجي غير موجود، أو انتهت صلاحيته، أو تم استخدامه بالكامل."
+      already_activated: "لقد استخدمت هذا الرمز الترويجي بالفعل!"
+      no_dicks: "ليس لديك أي نباتات بعد! أضفني إلى مجموعة واستخدم /grow للبدء!"
+    inline:
+      switch_button: "تفعيل الرمز الترويجي '%{code}'..."
+  referral:
+    description: "احصل على رمز الإحالة الشخصي"
+    your_code: "رمز الإحالة الخاص بك: <code>%{code}</code>\n\nشاركه مع أصدقائك! عندما ينضمون ويصلون إلى 25 سم، ستحصلان على مكافآت!"
+    stats: "الإحالات الناجحة: <b>%{count}</b>/50\nإجمالي المكافأة المكتسبة: <b>%{bonus} سم</b>"
+    reward:
+      referrer: "صديقك <b>%{name}</b> وصل إلى 25 سم! حصلت على <b>%{bonus} سم</b> و<b>%{sunbeams} شعاع شمس</b>!"
+      referee: "مرحباً! مُحيلك <b>%{name}</b> ساعدك على البدء. إليك <b>50 شعاع شمس</b> وعنصر <b>سماد</b>!"
+    errors:
+      max_referrals: "وصلت إلى الحد الأقصى من 50 إحالة."
+      self_referral: "لا يمكنك استخدام رمز الإحالة الخاص بك!"
+      already_referred: "لقد تمت إحالتك بالفعل من شخص آخر."
+  achievements:
+    description: "عرض إنجازاتك"
+    title: "إنجازاتك:"
+    locked: "(مقفل)"
+    progress: "%{current}/%{target}"
+    list:
+      first_bloom: "أول إزهار - ازرع نبتتك الأولى"
+      kind_soul_1: "روح طيبة I - أظهر الرحمة 10 مرات"
+      kind_soul_2: "روح طيبة II - أظهر الرحمة 50 مرة"
+      kind_soul_3: "روح طيبة III - أظهر الرحمة 200 مرة"
+      underdog: "انتصار المستضعف - اربح مبارزة وأنت في أدنى 25%"
+      centenarian: "المئوي - وصل إلى 100 سم"
+      mythical: "البستان الأسطوري - وصل إلى مرحلة النمو النهائية"
+      traveler: "مسافر عالمي - شارك في 12 حدثاً شهرياً"
+      generous: "روح كريمة - أهدِ عناصر لـ 25 لاعباً مختلفاً"
+      champion: "بطل المجموعة - اربح نبتة اليوم 10 مرات"
+  perks:
+    description: "عرض وإدارة مميزاتك"
+    title: "مميزاتك النشطة (%{active}/%{max} خانة):"
+    available: "المميزات المتاحة:"
+    list:
+      morning_dew: "ندى الصباح - +2 سم مكافأة قبل 9 صباحاً"
+      deep_roots: "جذور عميقة - حماية أفضل من الخسارة بنسبة 50%"
+      sunkissed: "قبلة الشمس - +10% عائد أشعة الشمس"
+      whisperer: "الهامس - شاهد إحصائيات الخصم قبل المبارزات"
+      evergreen: "دائم الخضرة - تقليل وقت انتظار النمو بساعة واحدة"
+      hearthwarden: "حارس الموقد - مضاعفة مكافآت الرحمة"
+    activate: "تفعيل"
+    deactivate: "إلغاء التفعيل"
+    slot_full: "جميع خانات المميزات ممتلئة. ألغِ تفعيل واحدة أولاً أو اشترِ المزيد من الخانات من المتجر!"
+  shop:
+    description: "زيارة متجر الحديقة"
+    title: "متجر الحديقة"
+    balance: "أشعة الشمس لديك: <b>%{sunbeams}</b>"
+    categories:
+      consumables: "المستهلكات"
+      cosmetics: "المظاهر"
+      upgrades: "الترقيات"
+      bundles: "الحزم"
+    items:
+      fertilizer: "سماد - اكتسب +10 سم فوراً"
+      watering_can: "علبة سقي - تخطى وقت انتظار النمو مرة واحدة"
+      phoenix_seed: "بذرة الفينيق - استعد إلى متوسط طول 7 أيام"
+      grace_token: "رمز النعمة - فرض نتيجة الرحمة في الخسارة التالية"
+      perk_slot: "خانة ميزة إضافية - أضف ميزة نشطة أخرى"
+    buy: "شراء"
+    gift: "إهداء لصديق"
+    confirm: "تأكيد شراء <b>%{item}</b> مقابل <b>%{price} شعاع شمس</b>؟"
+    success: "تم الشراء بنجاح! لديك الآن <b>%{item}</b>."
+    errors:
+      insufficient_funds: "أشعة الشمس غير كافية! تحتاج <b>%{needed}</b> إضافية."
+      max_owned: "لديك بالفعل الحد الأقصى من هذا العنصر."
+  underdog:
+    comeback_boost: "تم تفعيل دفعة العودة! نموك التالي مضاعف، بالإضافة إلى سماد مجاني!"
+    phoenix_seed: "بعد 5 خسارات هذا الأسبوع، حصلت على بذرة الفينيق! استخدمها لاستعادة طولك."
+    mentor_offer: "هل تريد أن يكون <b>%{mentor_name}</b> مرشدك؟ ستحصل على +5% نمو أثناء الإرشاد!"
+    mentor_accept: "بدأ الإرشاد! <b>%{mentor_name}</b> سيساعدك على النمو."
+  events:
+    description: "عرض الأحداث الحالية والقادمة"
+    current: "الحدث الحالي: <b>%{name}</b>\n%{description}\nينتهي في: <b>%{time_left}</b>"
+    upcoming: "الحدث القادم: <b>%{name}</b>\nيبدأ في: <b>%{time_until}</b>"
+    leaderboard: "لوحة صدارة الحدث:"
+    participation_reward: "شكراً للمشاركة! حصلت على: <b>%{reward}</b>"
+inline:
+  results:
+    text: "بما أنني لا أستطيع تحديد المجموعة من الاستعلام المضمن، يرجى النقر على الزر أدناه."
+    button: "اضغط هنا!"
+    titles:
+      grow: "ازرع نبتتك!"
+      top: "شاهد أطول النباتات"
+      dick_of_day: "توج نبتة اليوم"
+      pvp: "تحدَّ الآخرين برهان %{bet} سم!"
+      stats: "إحصائيات الحديقة"
+      loan: "احصل على قرض حديقة"
+  callback:
+    errors:
+      another_user: "هذا أُرسل من بستاني آخر."
+      invalid_data: "قد تكون هذه الرسالة من إصدار قديم. يرجى المحاولة مرة أخرى."
+      unknown_data: "أمر غير معروف"
+      no_data: "حدث خطأ ما..."
+titles:
+  greeting: "مرحباً بك في SproutQuest!"
+  time_till_next_day:
+    none: " عد غداً!"
+    some: "\n\nالسقي التالي خلال <b>%{hours}</b> ساعة و<b>%{minutes}</b> دقيقة."
+  perks:
+    top_line: "المميزات النشطة التي تؤثر على نموك"
+    help-pussies: "مكافأة التعافي"
+    loan-payout: "سداد القرض"
+errors:
+  not_group_chat: "SproutQuest مخصص للعب في مجموعات! أضفني إلى مجموعة لبدء الزراعة."
+  feature_disabled: "هذه الميزة معطلة مؤقتاً للصيانة."

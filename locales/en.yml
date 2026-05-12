@@ -1,0 +1,211 @@
+commands:
+  help:
+    description: "I'll help you tend your garden!"
+  privacy:
+    description: "Privacy Policy detailing what data we store"
+  grow:
+    description: "Grow your sprout!"
+    result: "Your sprout has %{event} by <b>%{incr} cm</b> and now it is <b>%{length} cm</b> tall!"
+    direction:
+      grown: "sprouted"
+      shrunk: "been pruned"
+    position: "Your position in the garden is <b>%{pos}</b>."
+    tomorrow: "You have already watered your sprout today. Come back tomorrow!"
+    pruned_consolation: "Don't worry! Here are <b>%{sunbeams} sunbeams</b> to help you grow stronger next time."
+  top:
+    description: "See the tallest sprouts in the garden"
+    title: "Garden Leaderboard - Tallest Sprouts:"
+    line: "%{n}|<b>%{name}</b> — <b>%{length}</b> cm"
+    ending: "<i>[+] means this gardener hasn't watered their sprout today yet.</i>"
+    empty: "The garden is empty! No one has planted a sprout yet."
+  dod:
+    description: "Crown the Sprout of the Day"
+    result: "The Sprout of the Day is <b><a href=\"tg://user?id=%{uid}\">%{name}</a></b>!\n\nTheir sprout has grown <b>%{growth} cm</b> taller and is now <b>%{length}</b> cm tall!"
+    position: "Their position in the garden is <b>%{pos}</b>."
+    already_chosen: "The Sprout of the Day has already been crowned today! It's <b>%{name}</b>."
+    no_candidates: "There are no candidates yet. No one in this garden has planted a sprout!"
+  pvp:
+    description: "Challenge a friend to a friendly sprout duel!"
+    results:
+      start: "<b>%{name}</b> challenged the garden with a bet of <b>%{bet} cm</b>!"
+      finish: "The winner is <b>%{winner_name}</b>! Their sprout is now <b>%{winner_length} cm</b> tall. The other sprout is <b>%{loser_length}</b> cm.\nThe bet was <b>%{bet} cm</b>."
+      position:
+        winner: "<b>%{name}</b>'s garden rank is <b>%{pos}</b>."
+        loser: "<b>%{name}</b>'s garden rank is <b>%{pos}</b>."
+      stats:
+        text: "Win rate of the <b>winner</b> — <b>%{winner_win_rate}</b>.\nCurrent win streak — <b>%{winner_win_streak}</b>, max streak — <b>%{winner_win_streak_max}</b>.\nWin rate of the <b>challenger</b> — <b>%{loser_win_rate}</b>."
+        lost_win_streak: "A streak of <b>%{lost_win_streak}</b> victories was broken."
+      withheld: "<b>%{payout} cm</b> were donated to repay a garden loan."
+      mercy:
+        shown: "<b>%{winner_name}</b> showed mercy! They only took <b>%{taken} cm</b> and left <b>%{returned} cm</b> for <b>%{loser_name}</b>."
+        full_return: "<b>%{winner_name}</b> showed great kindness! They returned all <b>%{bet} cm</b> to <b>%{loser_name}</b> and earned a Kind Soul point!"
+        grace_token: "<b>%{loser_name}</b> received a Grace Token for being shown mercy!"
+        blessed_buff: "<b>%{loser_name}</b> received the Blessed Sprout buff (+20% growth for 24h)!"
+    button: "Accept Challenge!"
+    mercy_buttons:
+      take_full: "Take Full Reward"
+      show_mercy: "Show Mercy (50/50)"
+      full_return: "Full Return (Kind Soul)"
+    mercy_prompt: "<b>%{winner_name}</b> won! Choose your action (15 seconds):"
+    mercy_timeout: "Time expired. Full reward was taken automatically."
+    errors:
+      no_args: "Please specify how many centimeters you want to bet. Example: /duel 10"
+      not_enough:
+        initiator: "Oops! Your sprout isn't tall enough for such a big bet!"
+        acceptor: "Your sprout needs to grow more before accepting this challenge!"
+      same_person: "You cannot duel with yourself! Challenge a friend instead."
+      battle_already_in_progress: "A duel is already in progress! Wait for it to finish..."
+  stats:
+    description: "View your garden statistics"
+    length: "Height: <b>%{length} cm</b>\nGarden Rank: <b>%{pos}</b>"
+    pvp: "Win rate: <b>%{win_rate}</b>\nDuels: <b>%{battles}</b>\nWins: <b>%{wins}</b>\nMax win streak: <b>%{win_streak}</b>\nHeight gained: <b>%{acquired} cm</b>\nHeight lost: <b>%{lost} cm</b>"
+    notice: "Statistics tracking began on July 2, 2024."
+    personal: "<i>Your personal garden stats:</i>\n— Gardens you're growing in: <b>%{chats}</b>\n— Tallest sprout: <b>%{max_length} cm</b>\n— Total height across all gardens: <b>%{total_length} cm</b>"
+    mercy_stats: "Mercy shown: <b>%{mercy_shown}</b> times\nMercy received: <b>%{mercy_received}</b> times\nKind Soul points: <b>%{kind_soul_points}</b>"
+  loan:
+    description: "Negative height? Get a garden loan!"
+    debt: "Remaining debt: <b>%{debt} cm</b>"
+    confirmation:
+      text: "Your sprout will be reset to zero, but each growth will be reduced by <b>%{payout_percentage}</b> until all <b>%{debt} cm</b> is repaid."
+      buttons:
+        agree: "Accept Loan"
+        disagree: "Decline"
+    callback:
+      success: "The garden loan has been issued successfully!"
+      refused: "The gardener declined the loan offer."
+      payout_ratio_changed: "The loan terms have changed. Please try again."
+    errors:
+      positive_length: "Sorry, this loan program is only for sprouts that have been over-pruned. Your sprout is healthy!"
+  import:
+    description: "Import sprouts from other bots"
+    result:
+      titles:
+        imported: "The following gardeners have been imported:"
+        already_present: "These gardeners were already in the garden:"
+        not_found: "These gardeners haven't started growing yet:"
+      line:
+        imported: "- <b>%{name}</b> (<i>%{length}</i> cm)"
+        already_present: "- <b>%{name}</b> (<i>%{length}</i> cm)"
+        not_found: "- <b>%{name}</b>"
+    errors:
+      not_admin: "Only garden admins can use this command!"
+      not_reply: "Please reply to a message from %{origin_bots}"
+      invalid_lines:
+        template: "Couldn't parse this message. Invalid lines:\n%{invalid_lines}"
+        line: "- <b>%{line}</b>"
+  promo:
+    description: "Activate a promo code"
+    request: "Enter your promo code:"
+    success:
+      template: "Promo code activated successfully! %{ending}"
+      singular: "Your sprout grew by <b>%{growth}</b> cm in one garden."
+      plural: "Your sprout grew by <b>%{growth}</b> cm in <b>%{affected_chats}</b> gardens!"
+    errors:
+      no_activations_left: "This promo code doesn't exist, has expired, or has been fully used."
+      already_activated: "You've already used this promo code!"
+      no_dicks: "You don't have any sprouts yet! Add me to a chat and use /grow to start!"
+    inline:
+      switch_button: "Activate promo code '%{code}'..."
+  referral:
+    description: "Get your personal referral code"
+    your_code: "Your referral code: <code>%{code}</code>\n\nShare it with friends! When they join and reach 25 cm, you both get rewards!"
+    stats: "Successful referrals: <b>%{count}</b>/50\nTotal bonus earned: <b>%{bonus} cm</b>"
+    reward:
+      referrer: "Your friend <b>%{name}</b> reached 25 cm! You earned <b>%{bonus} cm</b> and <b>%{sunbeams} sunbeams</b>!"
+      referee: "Welcome! Your referrer <b>%{name}</b> helped you start. Here's <b>50 sunbeams</b> and a <b>Fertilizer</b> item!"
+    errors:
+      max_referrals: "You've reached the maximum of 50 referrals."
+      self_referral: "You can't use your own referral code!"
+      already_referred: "You've already been referred by someone else."
+  achievements:
+    description: "View your achievements"
+    title: "Your Achievements:"
+    locked: "(Locked)"
+    progress: "%{current}/%{target}"
+    list:
+      first_bloom: "First Bloom - Plant your first sprout"
+      kind_soul_1: "Kind Soul I - Show mercy 10 times"
+      kind_soul_2: "Kind Soul II - Show mercy 50 times"
+      kind_soul_3: "Kind Soul III - Show mercy 200 times"
+      underdog: "Underdog Triumphs - Win a duel while in the bottom 25%"
+      centenarian: "Centenarian - Reach 100 cm"
+      mythical: "Mythical Grove - Reach the final growth stage"
+      traveler: "World Traveler - Participate in 12 monthly events"
+      generous: "Generous Spirit - Gift items to 25 different players"
+      champion: "Chat Champion - Win Sprout of the Day 10 times"
+  perks:
+    description: "View and manage your perks"
+    title: "Your Active Perks (%{active}/%{max} slots):"
+    available: "Available Perks:"
+    list:
+      morning_dew: "Morning Dew - +2 cm bonus before 9 AM"
+      deep_roots: "Deep Roots - 50% better loss protection"
+      sunkissed: "Sunkissed - +10% sunbeam yield"
+      whisperer: "Whisperer - See opponent's stats before duels"
+      evergreen: "Evergreen - Grow cooldown reduced by 1 hour"
+      hearthwarden: "Hearthwarden - Double mercy rewards"
+    activate: "Activate"
+    deactivate: "Deactivate"
+    slot_full: "All perk slots are full. Deactivate one first or buy more slots in the shop!"
+  shop:
+    description: "Visit the garden shop"
+    title: "Garden Shop"
+    balance: "Your sunbeams: <b>%{sunbeams}</b>"
+    categories:
+      consumables: "Consumables"
+      cosmetics: "Cosmetics"
+      upgrades: "Upgrades"
+      bundles: "Bundles"
+    items:
+      fertilizer: "Fertilizer - Gain +10 cm instantly"
+      watering_can: "Watering Can - Skip grow cooldown once"
+      phoenix_seed: "Phoenix Seed - Revive to 7-day average height"
+      grace_token: "Grace Token - Force mercy outcome in next loss"
+      perk_slot: "Extra Perk Slot - Add another active perk"
+    buy: "Buy"
+    gift: "Gift to Friend"
+    confirm: "Confirm purchase of <b>%{item}</b> for <b>%{price} sunbeams</b>?"
+    success: "Purchase successful! You now have <b>%{item}</b>."
+    errors:
+      insufficient_funds: "Not enough sunbeams! You need <b>%{needed}</b> more."
+      max_owned: "You already own the maximum amount of this item."
+  underdog:
+    comeback_boost: "Comeback Boost activated! Your next growth is doubled, plus you received a free Fertilizer!"
+    phoenix_seed: "After 5 losses this week, you received a Phoenix Seed! Use it to restore your height."
+    mentor_offer: "Would you like <b>%{mentor_name}</b> to be your mentor? You'll get +5% growth while mentored!"
+    mentor_accept: "Mentorship started! <b>%{mentor_name}</b> will help you grow."
+  events:
+    description: "View current and upcoming events"
+    current: "Current Event: <b>%{name}</b>\n%{description}\nEnds in: <b>%{time_left}</b>"
+    upcoming: "Next Event: <b>%{name}</b>\nStarts in: <b>%{time_until}</b>"
+    leaderboard: "Event Leaderboard:"
+    participation_reward: "Thanks for participating! You earned: <b>%{reward}</b>"
+inline:
+  results:
+    text: "Since I cannot determine the chat from an inline query, please click the button below."
+    button: "Click me!"
+    titles:
+      grow: "Grow your sprout!"
+      top: "See the tallest sprouts"
+      dick_of_day: "Crown the Sprout of the Day"
+      pvp: "Challenge others with a bet of %{bet} cm!"
+      stats: "Garden statistics"
+      loan: "Get a garden loan"
+  callback:
+    errors:
+      another_user: "This was sent by another gardener."
+      invalid_data: "This message may be from an older version. Please try again."
+      unknown_data: "Unknown command"
+      no_data: "Something went wrong..."
+titles:
+  greeting: "Welcome to SproutQuest!"
+  time_till_next_day:
+    none: " Come back tomorrow!"
+    some: "\n\nNext watering in <b>%{hours}</b>h <b>%{minutes}</b>m."
+  perks:
+    top_line: "Active perks affecting your growth"
+    help-pussies: "recovery bonus"
+    loan-payout: "loan repayment"
+errors:
+  not_group_chat: "SproutQuest is meant to be played in group chats! Add me to a group to start growing."
+  feature_disabled: "This feature is temporarily disabled for maintenance."
