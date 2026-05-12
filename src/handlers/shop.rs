@@ -1,245 +1,76 @@
-use rust_i18n::t;
-use teloxide::Bot;
-use teloxide::macros::BotCommands;
-use teloxide::payloads::AnswerCallbackQuerySetters;
-use teloxide::requests::Requester;
-use teloxide::types::{CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message};
-use crate::domain::LanguageCode;
-use crate::handlers::utils::callbacks::{CallbackDataWithPrefix, InvalidCallbackData, InvalidCallbackDataBuilder};
-use crate::handlers::{reply_html, CallbackResult, HandlerResult};
-use crate::repo::Repositories;
+Railway deployment failed — Build Error
 
-#[derive(BotCommands, Clone)]
-#[command(rename_rule = "lowercase")]
-pub enum ShopCommands {
-    #[command(description = "shop")]
-    Shop,
-}
+The Rust build fails with 48 compilation errors that must be fixed in the source code. SQLx compile-time query macros need either a valid DATABASE_URL at build time or offline mode with a committed .sqlx directory, but neither is available. There are also Rust code errors in src/handlers/shop.rs and src/handlers/underdog.rs that must be resolved before the build can succeed.
 
-/// Shop item definitions
-#[derive(Clone, Debug)]
-pub struct ShopItem {
-    pub key: &'static str,
-    pub price: u32,
-    pub category: ItemCategory,
-    pub max_owned: Option<u32>,
-}
+Repository: https://github.com/nader295/Sprout-Quest
+Branch: main · Commit: 6ce62bf — Update Dockerfile
+Deployment ID: a22ee7f6-431c-47bd-8fe2-2de51131e087
+Service ID: 0085be2a-7431-4253-ba6f-4d82b63f7bcd
+Environment ID: d492a6a6-c34e-4766-9bf6-1cf9b1a82d5a
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum ItemCategory {
-    Consumable,
-    Cosmetic,
-    Upgrade,
-    Bundle,
-}
+---
 
-/// All available shop items
-pub const SHOP_ITEMS: &[ShopItem] = &[
-    ShopItem { key: "fertilizer", price: 100, category: ItemCategory::Consumable, max_owned: Some(10) },
-    ShopItem { key: "watering_can", price: 150, category: ItemCategory::Consumable, max_owned: Some(5) },
-    ShopItem { key: "phoenix_seed", price: 300, category: ItemCategory::Consumable, max_owned: Some(3) },
-    ShopItem { key: "grace_token", price: 200, category: ItemCategory::Consumable, max_owned: Some(5) },
-    ShopItem { key: "perk_slot", price: 500, category: ItemCategory::Upgrade, max_owned: Some(3) },
-];
+## Problem
+Service: Sprout-Quest (REPO, nader295/Sprout-Quest, branch main, commit 6ce62bfcd6e26127e8da30ddcfcdc93e05e37e8c). Builder: Dockerfile. Failure stage: BUILD_IMAGE. The build fails with 48 Rust compilation errors during `cargo build --release`.
 
-/// Callback data for shop actions
-#[derive(derive_more::Display)]
-#[display("{action}:{item_key}")]
-pub struct ShopCallbackData {
-    action: ShopAction,
-    item_key: String,
-}
+Three distinct error classes:
+1. `error: relative URL without a base` — 40+ occurrences across all files in src/repo/. SQLx compile-time macros (sqlx::query!, sqlx::query_as!, sqlx::query_scalar!) require either a live DATABASE_URL or offline mode (.sqlx directory + `offline` feature). Neither is present.
+2. `error[E0716]: temporary value dropped while borrowed` — src/handlers/shop.rs lines 147, 151, 210, 230. The `t!()` macro is called with `&format!(...)` inline, creating a temporary String that is freed before the borrow ends.
+3. `error[E0277]: username::Username doesn't implement std::fmt::Display` — src/handlers/underdog.rs line 234, where `mentor.name` (of type `username::Username`) is used in a format string.
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum ShopAction {
-    View,
-    Buy,
-    Confirm,
-    Gift,
-}
+## Diagnosis
+The previous deployment (d31c63f3) failed because `COPY .sqlx/ .sqlx/` referenced a directory that does not exist in the repo. This commit removed that line and added `ARG DATABASE_URL` / `ENV DATABASE_URL=$DATABASE_URL` to the Dockerfile builder stage, intending to use a live database during build. However, DATABASE_URL was empty or invalid at build time, so SQLx macros still cannot validate queries. The Cargo.toml sqlx entry (`sqlx = { version = "0.8.3", features = [ "runtime-tokio", "postgres", "chrono", "tls-rustls" ] }`) does not include the `offline` feature, so offline mode is unavailable. The shop.rs and underdog.rs errors are independent Rust code bugs introduced separately.
 
-impl ShopAction {
-    fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "view" => Some(Self::View),
-            "buy" => Some(Self::Buy),
-            "confirm" => Some(Self::Confirm),
-            "gift" => Some(Self::Gift),
-            _ => None,
-        }
-    }
-    
-    fn as_str(&self) -> &'static str {
-        match self {
-            Self::View => "view",
-            Self::Buy => "buy",
-            Self::Confirm => "confirm",
-            Self::Gift => "gift",
-        }
-    }
-}
+## Fix
 
-impl std::fmt::Display for ShopAction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
+### File 1: Cargo.toml
+Current sqlx line:
+```
+sqlx = { version = "0.8.3", features = [ "runtime-tokio", "postgres", "chrono", "tls-rustls" ] }
+```
+Replace with:
+```
+sqlx = { version = "0.8.3", features = [ "runtime-tokio", "postgres", "chrono", "tls-rustls", "offline" ] }
+```
+This enables offline mode so SQLx macros use the cached .sqlx directory instead of a live database.
 
-impl ShopCallbackData {
-    pub fn new(action: ShopAction, item_key: &str) -> Self {
-        Self {
-            action,
-            item_key: item_key.to_string(),
-        }
-    }
-}
+After editing Cargo.toml, run `cargo sqlx prepare` locally with a valid DATABASE_URL pointing to your Postgres instance. This generates the .sqlx directory. Commit the entire .sqlx directory to the repo.
 
-impl CallbackDataWithPrefix for ShopCallbackData {
-    fn prefix() -> &'static str {
-        "shop"
-    }
-}
+### File 2: src/handlers/shop.rs
+For each of the four E0716 occurrences, bind the formatted key to a `let` before calling `t!()`. Example for line 147:
 
-impl TryFrom<String> for ShopCallbackData {
-    type Error = InvalidCallbackData;
+Current:
+```rust
+text.push_str(&format!("\n<b>{}:</b>\n", t!(&format!("commands.shop.categories.{}", cat_key), locale = &lang_code)));
+```
+Replace with:
+```rust
+let cat_key_path = format!("commands.shop.categories.{}", cat_key);
+text.push_str(&format!("\n<b>{}:</b>\n", t!(&cat_key_path, locale = &lang_code)));
+```
 
-    fn try_from(data: String) -> Result<Self, Self::Error> {
-        let err = InvalidCallbackDataBuilder(&data);
-        let mut parts = data.split(':');
-        
-        let action_str: String = crate::handlers::utils::callbacks::parse_part(&mut parts, &err, "action")?;
-        let action = ShopAction::from_str(&action_str).ok_or_else(|| err.split_err())?;
-        let item_key: String = crate::handlers::utils::callbacks::parse_part(&mut parts, &err, "item_key")?;
-        
-        Ok(Self { action, item_key })
-    }
-}
+For lines 151, 210, 230 (all follow the same pattern with `commands.shop.items.{}`):
 
-/// Handle /shop command
-pub async fn cmd_handler(
-    bot: Bot,
-    msg: Message,
-    repos: Repositories,
-) -> HandlerResult {
-    let user = msg.from.as_ref().ok_or("no FROM field")?;
-    let lang_code = LanguageCode::from_maybe_user(Some(user));
-    
-    // Get user's sunbeams balance
-    let balance = get_user_balance(&repos, user.id.0 as i64).await?;
-    
-    let mut text = format!(
-        "<b>{}</b>\n\n{}\n\n",
-        t!("commands.shop.title", locale = &lang_code),
-        t!("commands.shop.balance", locale = &lang_code, sunbeams = balance)
-    );
-    
-    // Group items by category
-    let mut current_category: Option<ItemCategory> = None;
-    
-    for item in SHOP_ITEMS {
-        if current_category.as_ref() != Some(&item.category) {
-            let cat_key = match item.category {
-                ItemCategory::Consumable => "consumables",
-                ItemCategory::Cosmetic => "cosmetics",
-                ItemCategory::Upgrade => "upgrades",
-                ItemCategory::Bundle => "bundles",
-            };
-            text.push_str(&format!("\n<b>{}:</b>\n", t!(&format!("commands.shop.categories.{}", cat_key), locale = &lang_code)));
-            current_category = Some(item.category.clone());
-        }
-        
-        let item_name = t!(&format!("commands.shop.items.{}", item.key), locale = &lang_code);
-        text.push_str(&format!("  {} - {} sunbeams\n", item_name, item.price));
-    }
-    
-    // Build keyboard with buy buttons
-    let buttons: Vec<Vec<InlineKeyboardButton>> = SHOP_ITEMS
-        .iter()
-        .filter(|item| item.category == ItemCategory::Consumable)
-        .map(|item| {
-            vec![InlineKeyboardButton::callback(
-                format!("{} ({} sunbeams)", t!("commands.shop.buy", locale = &lang_code), item.price),
-                ShopCallbackData::new(ShopAction::Buy, item.key).to_data_string(),
-            )]
-        })
-        .collect();
-    
-    let keyboard = InlineKeyboardMarkup::new(buttons);
-    
-    let mut answer = reply_html(bot, &msg, text);
-    answer.reply_markup = Some(teloxide::types::ReplyMarkup::InlineKeyboard(keyboard));
-    answer.await?;
-    
-    Ok(())
-}
+Current (line 151):
+```rust
+let item_name = t!(&format!("commands.shop.items.{}", item.key), locale = &lang_code);
+```
+Replace with:
+```rust
+let item_key_path = format!("commands.shop.items.{}", item.key);
+let item_name = t!(&item_key_path, locale = &lang_code);
+```
+Apply the same pattern to lines 210 and 230.
 
-/// Filter for shop callbacks
-#[inline]
-pub fn callback_filter(query: CallbackQuery) -> bool {
-    ShopCallbackData::check_prefix(query)
-}
+### File 3: src/handlers/underdog.rs
+Line 234 uses `mentor.name` (type `username::Username`) in a format string via the `t!()` macro, but `Username` does not implement `Display`.
 
-/// Handle shop callback queries
-pub async fn callback_handler(
-    bot: Bot,
-    query: CallbackQuery,
-    repos: Repositories,
-) -> HandlerResult {
-    let lang_code = LanguageCode::from_user(&query.from);
-    let callback_data = ShopCallbackData::parse(&query)?;
-    let user_id = query.from.id.0 as i64;
-    
-    match callback_data.action {
-        ShopAction::Buy => {
-            let item = SHOP_ITEMS.iter()
-                .find(|i| i.key == callback_data.item_key)
-                .ok_or("item not found")?;
-            
-            let balance = get_user_balance(&repos, user_id).await?;
-            
-            if balance < item.price {
-                let needed = item.price - balance;
-                bot.answer_callback_query(&query.id)
-                    .text(t!("commands.shop.errors.insufficient_funds", locale = &lang_code, needed = needed))
-                    .show_alert(true)
-                    .await?;
-                return Ok(());
-            }
-            
-            // Show confirmation
-            let item_name = t!(&format!("commands.shop.items.{}", item.key), locale = &lang_code);
-            let text = t!("commands.shop.confirm", locale = &lang_code, item = item_name.to_string(), price = item.price);
-            
-            let keyboard = InlineKeyboardMarkup::new(vec![vec![
-                InlineKeyboardButton::callback(
-                    "Confirm",
-                    ShopCallbackData::new(ShopAction::Confirm, item.key).to_data_string(),
-                ),
-            ]]);
-            
-            CallbackResult::EditMessage(text.to_string(), Some(keyboard)).apply(bot, query).await?;
-        }
-        ShopAction::Confirm => {
-            let item = SHOP_ITEMS.iter()
-                .find(|i| i.key == callback_data.item_key)
-                .ok_or("item not found")?;
-            
-            // Process purchase (in production, this would be a transaction)
-            // repos.shop.purchase(user_id, item.key, item.price).await?;
-            
-            let item_name = t!(&format!("commands.shop.items.{}", item.key), locale = &lang_code);
-            let text = t!("commands.shop.success", locale = &lang_code, item = item_name.to_string());
-            
-            CallbackResult::EditMessage(text.to_string(), None).apply(bot, query).await?;
-        }
-        _ => {}
-    }
-    
-    Ok(())
-}
-
-/// Get user's sunbeam balance
-async fn get_user_balance(_repos: &Repositories, _user_id: i64) -> anyhow::Result<u32> {
-    // In production, query the database
-    Ok(500) // Default starter balance for demo
-}
+Current (line 234):
+```rust
+mentor_name = mentor.name)
+```
+Replace with (using whichever accessor returns a `&str` or `String` for the username type, commonly `.to_string()` or `.as_str()`):
+```rust
+mentor_name = mentor.name.to_string())
+```
+If `Username` has a different string accessor (e.g., `.0` for a newtype), use that instead.
