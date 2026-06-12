@@ -1,0 +1,250 @@
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║  firestore.rules — RomX Firestore Security Rules                   ║
+// ║                                                                      ║
+// ║  روح Firebase Console → Firestore Database → Rules                  ║
+// ║  وانسخ الـ rules دي بالكامل بدل اللي موجود                         ║
+// ║                                                                      ║
+// ║  📅 آخر تحديث: 2026-03-26                                           ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ──────────────────────────────────────────────
+
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(uid())).data;
+    }
+
+    function hasRole(role) {
+      return isLoggedIn() && userDoc().role == role;
+    }
+
+    function isAdmin() {
+      return isLoggedIn() && (userDoc().role == 'admin' || userDoc().role == 'owner');
+    }
+
+    function isOwner() {
+      return isLoggedIn() && userDoc().role == 'owner';
+    }
+
+    function canUpload() {
+      return isLoggedIn() && (
+        userDoc().role == 'verifiedDev' ||
+        userDoc().role == 'admin' ||
+        userDoc().role == 'owner'
+      );
+    }
+
+    function isActive() {
+      return isLoggedIn() &&
+        userDoc().banned != true &&
+        (userDoc().suspendedUntil == null || userDoc().suspendedUntil < request.time);
+    }
+
+    function isOwnerOf(uid) {
+      return isLoggedIn() && request.auth.uid == uid;
+    }
+
+    // ── Users Collection ──────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isLoggedIn();
+
+      allow create: if isOwnerOf(userId) &&
+        request.resource.data.keys().hasAll(['name', 'email', 'uid']) &&
+        request.resource.data.uid == userId;
+
+      allow update: if (
+        isOwnerOf(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['role', 'banned', 'suspendedUntil', 'xp', 'romsCount',
+                   'totalLikesReceived', 'totalDownloads', 'subscribersCount'])
+      ) || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // ── ROMs Collection ───────────────────────────────────────────────
+    match /roms/{romId} {
+      allow read: if true;
+
+      allow create: if canUpload() && isActive() &&
+        request.resource.data.maintainerUid == uid() &&
+        request.resource.data.keys().hasAll(['name', 'device', 'contentType', 'downloadUrl', 'maintainerUid']);
+
+      allow update: if (
+        isActive() && isOwnerOf(resource.data.maintainerUid) &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['featured', 'viewsCount', 'likesCount', 'downloadsCount', 'maintainerUid'])
+      ) || isAdmin();
+
+      allow delete: if isAdmin() ||
+        (isActive() && isOwnerOf(resource.data.maintainerUid));
+    }
+
+    // ── ROM Versions ──────────────────────────────────────────────────
+    match /roms/{romId}/versions/{versionId} {
+      allow read: if true;
+      allow write: if canUpload() && isActive();
+    }
+
+    // ── ROM Likes ─────────────────────────────────────────────────────
+    match /roms/{romId}/likes/{userId} {
+      allow read: if isLoggedIn();
+      allow write: if isActive() && isOwnerOf(userId);
+    }
+
+    // ── ROM Comments ──────────────────────────────────────────────────
+    match /roms/{romId}/comments/{commentId} {
+      allow read: if true;
+
+      allow create: if isActive() &&
+        request.resource.data.uid == uid();
+
+      allow update, delete: if isAdmin() ||
+        (isActive() && isOwnerOf(resource.data.uid));
+    }
+
+    // ── Downloads Tracking ────────────────────────────────────────────
+    match /roms/{romId}/downloads/{docId} {
+      allow read: if isAdmin();
+      allow create: if isLoggedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Reports ───────────────────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if isAdmin() ||
+        (isLoggedIn() && resource.data.reporterUid == uid());
+
+      allow create: if isActive() &&
+        request.resource.data.reporterUid == uid() &&
+        request.resource.data.keys().hasAll(['targetType', 'targetId', 'reason', 'reporterUid']);
+
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Appeals ───────────────────────────────────────────────────────
+    match /appeals/{appealId} {
+      allow read: if isAdmin() ||
+        (isLoggedIn() && resource.data.uid == uid());
+      allow create: if isLoggedIn() &&
+        request.resource.data.uid == uid();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Applications (VerifiedDev) ────────────────────────────────────
+    match /applications/{appId} {
+      allow read: if isAdmin() ||
+        (isLoggedIn() && resource.data.uid == uid());
+      allow create: if isActive() &&
+        request.resource.data.uid == uid() &&
+        request.resource.data.keys().hasAll(['uid', 'username', 'reason']);
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Notifications ─────────────────────────────────────────────────
+    // ⚠️ الكتابة من Admin SDK فقط — sendNotif() في lib/server/notifications.ts
+    match /notifications/{notifId} {
+      allow read: if isLoggedIn() && resource.data.toUid == uid();
+      allow create: if false; // Admin SDK only
+      allow update: if isLoggedIn() && resource.data.toUid == uid(); // mark as read
+      allow delete: if isLoggedIn() && resource.data.toUid == uid();
+    }
+
+    // ── User Follows ──────────────────────────────────────────────────
+    match /users/{userId}/followers/{followerId} {
+      allow read: if true;
+      allow write: if isActive() && isOwnerOf(followerId);
+    }
+
+    match /users/{userId}/following/{followingId} {
+      allow read: if true;
+      allow write: if isActive() && isOwnerOf(userId);
+    }
+
+    // ── Announcements ─────────────────────────────────────────────────
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Settings / Stats ─────────────────────────────────────────────
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if false; // Admin SDK only
+    }
+
+    // ── Admin Logs ────────────────────────────────────────────────────
+    match /admin_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Collections (User-created ROM lists) ─────────────────────────
+    match /collections/{collectionId} {
+      allow read: if resource.data.isPublic == true ||
+        (isLoggedIn() && resource.data.ownerUid == uid());
+      allow create: if isActive() &&
+        request.resource.data.ownerUid == uid();
+      allow update, delete: if isActive() &&
+        isOwnerOf(resource.data.ownerUid);
+    }
+
+    // ── Migrations ────────────────────────────────────────────────────
+    match /migrations/{migrationId} {
+      allow read: if isAdmin();
+      allow write: if false; // Admin SDK only
+    }
+
+    // ── Feeds (Fan-out personal feed) ─────────────────────────────────
+    match /feeds/{userId}/items/{itemId} {
+      allow read: if isLoggedIn() && uid() == userId;
+      allow write: if false; // Admin SDK only
+    }
+
+    // ── Presence (Online Users) ───────────────────────────────────────
+    match /presence/{sessionId} {
+      allow read: if true;
+      allow create, update: if isLoggedIn();
+      allow delete: if false; // TTL cleanup via Admin SDK
+    }
+
+    // ── ROM Download Dedup ────────────────────────────────────────────
+    match /rom_downloads_dedup/{docId} {
+      allow read, write: if false; // Admin SDK only
+    }
+
+    // ── ROM Views ─────────────────────────────────────────────────────
+    match /rom_views/{docId} {
+      allow read, write: if false; // Admin SDK only
+    }
+
+    // ── Reserved Usernames ────────────────────────────────────────────
+    match /reserved_usernames/{docId} {
+      allow read, write: if false; // Admin SDK only
+    }
+
+    // ── User Notifications (subcollection) ────────────────────────────
+    match /users/{userId}/notifications/{notifId} {
+      allow read: if isLoggedIn() && uid() == userId;
+      allow update: if isLoggedIn() && uid() == userId;
+      allow create, delete: if false; // Admin SDK only
+    }
+
+    // ── Catch-all: Deny everything else ──────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

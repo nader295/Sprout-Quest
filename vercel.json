@@ -1,0 +1,16 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 2 * * *"
+    }
+  ],
+  "functions": {
+    "app/api/sync-script/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
