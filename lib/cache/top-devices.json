@@ -1,0 +1,81 @@
+{
+  "lastUpdated": "2026-06-12T00:00:00Z",
+  "version": 1,
+  "devices": {
+    "sm-g920f": {
+      "name": "Samsung Galaxy S6",
+      "brand": "Samsung",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s6.jpg"
+    },
+    "sm-g930f": {
+      "name": "Samsung Galaxy S7 Edge",
+      "brand": "Samsung",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s7-edge.jpg"
+    },
+    "pixel-4": {
+      "name": "Google Pixel 4",
+      "brand": "Google",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/google-pixel-4.jpg"
+    },
+    "poco-x6": {
+      "name": "Poco X6",
+      "brand": "Xiaomi",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-poco-x6.jpg"
+    },
+    "redmi-note-12": {
+      "name": "Redmi Note 12",
+      "brand": "Xiaomi",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-12.jpg"
+    },
+    "nord-2": {
+      "name": "OnePlus Nord 2",
+      "brand": "OnePlus",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/oneplus-nord-2.jpg"
+    },
+    "nothing-phone-1": {
+      "name": "Nothing Phone (1)",
+      "brand": "Nothing",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/nothing-phone-1.jpg"
+    },
+    "rog-phone-6": {
+      "name": "ASUS ROG Phone 6",
+      "brand": "ASUS",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/asus-rog-phone-6.jpg"
+    },
+    "zenfone-9": {
+      "name": "ASUS Zenfone 9",
+      "brand": "ASUS",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/asus-zenfone-9.jpg"
+    },
+    "find-x5": {
+      "name": "OPPO Find X5",
+      "brand": "OPPO",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/oppo-find-x5.jpg"
+    },
+    "reno-8": {
+      "name": "OPPO Reno 8",
+      "brand": "OPPO",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/oppo-reno-8.jpg"
+    },
+    "xperia-1-iv": {
+      "name": "Sony Xperia 1 IV",
+      "brand": "Sony",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/sony-xperia-1-iv.jpg"
+    },
+    "edge-30": {
+      "name": "Motorola Edge 30",
+      "brand": "Motorola",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/motorola-edge-30.jpg"
+    },
+    "redmagic-7": {
+      "name": "REDMAGIC 7",
+      "brand": "ZTE",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/zte-nubia-redmagic-7.jpg"
+    },
+    "realme-gt-2": {
+      "name": "Realme GT 2",
+      "brand": "Realme",
+      "url": "https://fdn2.gsmarena.com/vv/bigpic/realme-gt-2.jpg"
+    }
+  }
+}
